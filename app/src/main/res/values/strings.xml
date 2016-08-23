@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">NewsApp</string>
+    <string name="search">Search</string>
+    <string name="No_news">No News Found</string>
+</resources>
