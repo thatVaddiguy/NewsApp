@@ -104,11 +104,15 @@ public final class Utils {
             JSONArray newsArray = response.getJSONArray("results");
             for (int i=0;i<newsArray.length();i++){
                 JSONObject currentNews = newsArray.getJSONObject(i);
+                String author = "Author N/A";
+                JSONArray authors = currentNews.getJSONArray("tags");
+                if (authors.length()>0){
+                    author = authors.getJSONObject(0).getString("webTitle");
+                }
                 String title = currentNews.getString("webTitle");
                 String category = currentNews.getString("sectionName");
                 String url = currentNews.getString("webUrl");
-
-                News newsObject = new News(title,category,url);
+                News newsObject = new News(title, category, url,author);
                 news.add(newsObject);
             }
         } catch (JSONException e) {

@@ -8,11 +8,21 @@ public class News {
     private String title;
     private String category;
     private String url;
+    private String author;
 
-    public News(String title,String category, String url) {
+    public News(String title,String category, String url,String author) {
         this.category = category;
         this.title = title;
         this.url = url;
+        this.author = author;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
     }
 
     public String getCategory() {

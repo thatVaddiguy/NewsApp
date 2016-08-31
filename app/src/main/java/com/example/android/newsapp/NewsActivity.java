@@ -9,12 +9,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -22,15 +20,14 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class NewsActivity extends AppCompatActivity implements LoaderCallbacks<List<News>>  {
 
-    private static String query;
-    private static String requestUrl = "http://content.guardianapis.com/search?q=#&api-key=test";
+    private static String requestUrl = "http://content.guardianapis.com/search?q=debates&api-key=test&show-tags=contributor";
     private static final int NEWS_LOADER_ID=1;
     private NewsAdapter adapter;
     private TextView emptyStateView;
     private ProgressBar progressBar;
-
 
     @Override
     public Loader<List<News>> onCreateLoader(int i, Bundle bundle) {
@@ -45,13 +42,20 @@ public class NewsActivity extends AppCompatActivity implements LoaderCallbacks<L
         emptyStateView.setText(R.string.No_news);
 
         if (news!=null&&!news.isEmpty()){
+            adapter.clear();
             adapter.addAll(news);
+            adapter.notifyDataSetChanged();
         }
+
     }
 
     @Override
     public void onLoaderReset(Loader<List<News>> loader) {
         adapter.clear();
+    }
+
+    private void restartLoader(){
+        getLoaderManager().restartLoader(NEWS_LOADER_ID, null, this);
     }
 
     @Override
@@ -62,23 +66,12 @@ public class NewsActivity extends AppCompatActivity implements LoaderCallbacks<L
         progressBar = (ProgressBar)findViewById(R.id.progress_bar);
         emptyStateView = (TextView)findViewById(R.id.empty_view);
 
-
+        final SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.swipe_refresh_layout);
         ListView newsListView = (ListView)findViewById(R.id.list);
         newsListView.setEmptyView(emptyStateView);
 
         adapter = new NewsAdapter(this,new ArrayList<News>());
         newsListView.setAdapter(adapter);
-
-        Button button = (Button)findViewById(R.id.search_button);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                EditText editText = (EditText)findViewById(R.id.search_text);
-                query=editText.getText().toString();
-                requestUrl=requestUrl.replace("#",query);
-                Log.e("NewsActivity",requestUrl);
-            }
-        });
 
         newsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -88,6 +81,15 @@ public class NewsActivity extends AppCompatActivity implements LoaderCallbacks<L
                 Uri newsUri = Uri.parse(currentNews.getUrl());
                 Intent websiteIntent = new Intent(Intent.ACTION_VIEW, newsUri);
                 startActivity(websiteIntent);
+            }
+        });
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
+
+            @Override
+            public void onRefresh() {
+                restartLoader();
+                swipeRefreshLayout.setRefreshing(false);
             }
         });
 
@@ -103,5 +105,6 @@ public class NewsActivity extends AppCompatActivity implements LoaderCallbacks<L
         }
 
     }
+
 
 }
